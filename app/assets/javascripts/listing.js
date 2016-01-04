@@ -108,37 +108,42 @@ $(document).ready(function(){
            "&endTime=" + endTime
       }).done(function(response){
         var list = "";
-        for(var i = 0; i < response.length; i++) {
-          var marker = new google.maps.Marker({
-            map: window.map,
-            position: {lat: response[i].latitude, lng: response[i].longitude},
-            title: String(response[i].address),
-            id: response[i].id
-          });
-          marker.addListener('click', function(event){
-            $.ajax({
-              method: 'get',
-              url: '/listings/' + this.id
-            }).done(function(response){
-              // window.map.setCenter(marker.position);
-              $(".single-listing").html(response);
-              var targetHeight = $("#listingPreviewInfo").height()+1;
-              $("#listingPreviewImg").height(targetHeight);
-             })
-          });
+        if (response.length == 0){
+          list += "<div class='col-xs-12'><p>Sorry, it looks like there are no available places to park here at this time. Try checking other nearby cities or a different time period.</p></div>"
+        }else{
+          for(var i = 0; i < response.length; i++) {
+            var marker = new google.maps.Marker({
+              map: window.map,
+              position: {lat: response[i].latitude, lng: response[i].longitude},
+              title: String(response[i].address),
+              id: response[i].id
+            });
+            marker.addListener('click', function(event){
+              $.ajax({
+                method: 'get',
+                url: '/listings/' + this.id
+              }).done(function(response){
+                // window.map.setCenter(marker.position);
+                $(".single-listing").html(response);
+                var targetHeight = $("#listingPreviewInfo").height()+1;
+                $("#listingPreviewImg").height(targetHeight);
+               })
+            });
 
-           list += "<div class='col-xs-12'><p>"
-           list += "<a href='/listings/"+response[i].id+"'>"
-           list += response[i].address;
-           list += "</a>"
-           list += "</p></div>"
+             list += "<div class='col-xs-12'><p>"
+             list += "<a href='/listings/"+response[i].id+"'>"
+             list += response[i].address;
+             list += "</a>"
+             list += "</p></div>"
+           } //end for loop
+         }//end if-else
 
-         }
-        $("#listView").html(list);
+          $("#listView").html(list);
+
       }).fail(function(error){
         console.log(error);
       });
-  });
+  }); //end bounds changed
 
   $('.single-listing').on('click', '.listing-info', function(event) {
     window.location.href = '/listings/' + this.id;
